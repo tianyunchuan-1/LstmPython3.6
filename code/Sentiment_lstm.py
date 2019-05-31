@@ -185,8 +185,25 @@ def lstm_predict(string):
     else:
         print(string, ' negative')
 
+import pymongo
+def Analysis_lstm(dbname):
+    client = pymongo.MongoClient('127.0.0.1', 27017)
+    db = client.weibo
+    for i in db[dbname].find():
+        text=i['text']#2018-11-22-22_17_05台风山竹
+        sen_test=lstm_predict(text)
+        data={
+            "sentiment_lstm":sen_test
+        }
+        mongoid = i['_id']
+        myquery = {"_id": mongoid}
+        newvalues = {"$set": data}
+        db[dbname].update_one(myquery, newvalues)
+        print('插入一个')
 
 if __name__ == '__main__':
+    #训练集
     # train()
     string = '电池充完了电连手机都打不开.简直烂的要命.真是金玉其外,败絮其中!连5号电池都不如'
     lstm_predict(string)
+    Analysis_lstm('mangkhut')
